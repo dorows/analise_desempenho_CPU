@@ -1,143 +1,43 @@
+#################################################
+
+# teste de analise com o teste de compressao de video 
+library(ggplot2)
 library(dplyr)
-library(readr)
-library(stringr)
 
-# 1. Ler CSV
-bench <- read_csv("SPEC2017.csv")
+# Carregar dados 
+rate_int <- read.csv("RATE_int.csv")
+speed_int <- read.csv("SPEED_int.csv")
 
-# 2. Padronizar colunas (caso tenham espaços ou caracteres estranhos)
-names(bench) <- make.names(names(bench))
+# Selecionar colunas de interesse + benchmarks de compressão
+rate_video <- rate_int %>%
+  select(Benchmark, Processor, Processor.MHz, X..Cores, X..Chips,
+         X..Enabled.Threads.Per.Core, Memory, X3rd.Level.Cache, X525.Base, X525.Peak)
 
-# 3. Criar classificação inicial Servidor vs Desktop
-bench <- bench %>%
-  mutate(Type = case_when(
-    str_detect(Processor, regex("EPYC|Xeon", ignore_case = TRUE)) ~ "Server",
-    str_detect(Processor, regex("Ryzen|Core", ignore_case = TRUE)) ~ "Desktop",
-    TRUE ~ "Other"
-  ))
+speed_video <- speed_int %>%
+  select(Benchmark, Processor., Processor.MHz, X..Cores, X..Chips,
+         X..Enabled.Threads.Per.Core, Memory, X3rd.Level.Cache, X625.Base, X625.Peak)
 
-# 4. Filtrar só os que interessam (EPYC, Xeon, Ryzen, Core)
-bench <- bench %>%
-  filter(Type %in% c("Server", "Desktop"))
+# Exemplo 1: relação núcleos vs 525.x264_r (throughput)
+ggplot(rate_video, aes(x = X..Cores, y = X525.Base)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Relação entre # Cores e 525.x264_r (RATE_int)",
+       x = "Número de Cores", y = "Resultado 525 Base")
 
-# 5. Selecionar variáveis relevantes
-bench_clean <- bench %>%
-  select(
-    Hardware.Vendor,
-    Processor,
-    Type,
-    X..Cores,
-    Processor.MHz,
-    Memory,
-    Result,
-    Baseline,
-    HW.Avail,
-    `X600.Base`, `X600.Peak`,
-    `X602.Base`, `X602.Peak`,
-    `X605.Base`, `X605.Peak`
-  )
-
-# 6. Criar dois datasets separados
-server_data <- bench_clean %>% filter(Type == "Server")
-desktop_data <- bench_clean %>% filter(Type == "Desktop")
-
-# Visualizar
-head(server_data)
-head(desktop_data)
-
-# Ver primeiras linhas
-head(bench_clean)
-
-# Resumo estatístico geral
-summary(bench_clean)
-
-# Contagem por tipo (Server vs Desktop)
-bench_clean %>% count(Type)
-
-# Distribuição por fabricante
-bench_clean %>%
-  mutate(Vendor = case_when(
-    str_detect(Processor, "AMD") ~ "AMD",
-    str_detect(Processor, "Intel") ~ "Intel",
-    TRUE ~ "Other"
-  )) %>%
-  count(Type, Vendor)
+# Exemplo 1 com o Peak
+ggplot(rate_video, aes(x = X..Cores, y = X525.Peak)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Relação entre # Cores e 525.x264_r (RATE_int)",
+       x = "Número de Cores", y = "Resultado 525 peak")
+# Ponto importante: nem todos as CPUs receberam a otimização para aparecerem no Peak.
 
 
-# Calcular média, mediana, desvio padrão das variáveis principais:
-bench_clean %>%
-  group_by(Type) %>%
-  summarise(
-    media_cores = mean(X..Cores, na.rm = TRUE),
-    sd_cores = sd(X..Cores, na.rm = TRUE),
-    media_mhz = mean(Processor.MHz, na.rm = TRUE),
-    media_result = mean(Result, na.rm = TRUE),
-    media_baseline = mean(Baseline, na.rm = TRUE)
-  )
+# Exemplo 2: relação frequência vs 625.x264_s (latência)
+ggplot(speed_video, aes(x = Processor.MHz, y = X625.Base)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Relação entre Frequência e 625.264_s (SPEED_int)",
+       x = "Frequência (MHz)", y = "Resultado 625 Base")
 
-# quem depende mais de otimização de compilador.
-
-bench_clean %>%
-  mutate(Gap = Result - Baseline) %>%
-  group_by(Type, Vendor = ifelse(str_detect(Processor, "AMD"), "AMD", "Intel")) %>%
-  summarise(
-    media_gap = mean(Gap, na.rm = TRUE),
-    sd_gap = sd(Gap, na.rm = TRUE)
-  )
-
-
-bench_clean %>%
-  mutate(Vendor = case_when(
-    str_detect(Processor, "AMD") ~ "AMD",
-    str_detect(Processor, "Intel") ~ "Intel",
-    TRUE ~ "Other"
-  )) %>%
-  ggplot(aes(x = Vendor, y = Result, fill = Vendor)) +
-  geom_boxplot() +
-  facet_wrap(~Type) +
-  labs(title = "Distribuição do desempenho (Result) por fabricante e tipo")
-
-
-# tratando os dias para facilitar os graficos
-bench_clean <- bench_clean %>%
-  mutate(Date = as.Date(paste0("01-", HW.Avail), format = "%d-%b-%Y"))
-
-#bench_summary <- bench_clean %>%
-#  group_by(Processor, HW.Avail, Type) %>%
-#  summarise(Avg_Result = mean(Result, na.rm = TRUE)) %>%
-#  ungroup() %>%
-#  mutate(Date = as.Date(paste0("01-", HW.Avail), format = "%d-%b-%Y"),
-#         Year = format(Date, "%Y"))
-#
-#trend_all <- bench_summary %>%
-#  group_by(Year) %>%
-#  summarise(Avg_Result = mean(Avg_Result, na.rm = TRUE),
-#            Max_Result = max(Avg_Result, na.rm = TRUE),
-#            Count = n())
-#
-#ggplot(trend_all, aes(x = as.integer(Year), y = Avg_Result)) +
-#  geom_line(size = 1.2, color = "steelblue") +
-#  geom_point(size = 2, color = "steelblue") +
-#  labs(title = "Evolução do desempenho médio (Result) geral",
-#       x = "Ano de lançamento",
-#       y = "Desempenho médio (Result)") +
-#  theme_minimal()
-
-
-top_vendor <- bench_summary %>%
-  mutate(Hardware.Vendor = case_when(
-    str_detect(Processor, regex("EPYC|Ryzen", ignore_case = TRUE)) ~ "AMD",
-    str_detect(Processor, regex("Xeon|Core", ignore_case = TRUE)) ~ "Intel",
-    TRUE ~ "Other"
-  )) %>%
-  group_by(Year, Hardware.Vendor) %>%
-  summarise(Max_Result = max(Avg_Result, na.rm = TRUE), .groups = "drop")
-
-ggplot(top_vendor, aes(x = as.integer(Year), y = Max_Result, color = Hardware.Vendor)) +
-  geom_line(size = 1.2) +
-  geom_point(size = 2) +
-  labs(title = "Top de desempenho por ano (AMD vs Intel)",
-       x = "Ano de lançamento",
-       y = "Maior desempenho (Result)") +
-  theme_minimal()
-
+#################################################
