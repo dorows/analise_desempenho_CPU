@@ -1,0 +1,56 @@
+column,original_name,class_after
+Benchmark,Benchmark,factor
+Hardware Vendor,Hardware Vendor,factor
+System,System,factor
+# Cores,# Cores,integer
+# Chips,# Chips,integer
+# Enabled Threads Per Core,# Enabled Threads Per Core,integer
+Processor,Processor,factor
+Processor MHz,Processor MHz,numeric
+CPU(s) Orderable,CPU(s) Orderable,factor
+Parallel,Parallel,factor
+Base Pointer Size,Base Pointer Size,factor
+Peak Pointer Size,Peak Pointer Size,factor
+1st Level Cache,1st Level Cache,numeric
+2nd Level Cache,2nd Level Cache,numeric
+3rd Level Cache,3rd Level Cache,numeric
+Other Cache,Other Cache,numeric
+Memory,Memory,numeric
+Storage,Storage,factor
+Operating System,Operating System,factor
+File System,File System,factor
+Compiler,Compiler,factor
+HW Avail,HW Avail,ordered
+SW Avail,SW Avail,ordered
+Result,Result,numeric
+Baseline,Baseline,numeric
+Energy Peak Result,Energy Peak Result,numeric
+Energy Base Result,Energy Base Result,numeric
+600 Peak,600 Peak,numeric
+600 Base,600 Base,numeric
+602 Peak,602 Peak,numeric
+602 Base,602 Base,numeric
+605 Peak,605 Peak,numeric
+605 Base,605 Base,numeric
+620 Peak,620 Peak,numeric
+620 Base,620 Base,numeric
+623 Peak,623 Peak,numeric
+623 Base,623 Base,numeric
+625 Peak,625 Peak,numeric
+625 Base,625 Base,numeric
+631 Peak,631 Peak,numeric
+631 Base,631 Base,numeric
+641 Peak,641 Peak,numeric
+641 Base,641 Base,numeric
+648 Peak,648 Peak,numeric
+648 Base,648 Base,numeric
+657 Peak,657 Peak,numeric
+657 Base,657 Base,numeric
+License,License,factor
+Tested By,Tested By,factor
+Test Sponsor,Test Sponsor,factor
+Test Date,Test Date,ordered
+Published,Published,ordered
+Updated,Updated,ordered
+Disclosure,Disclosure,factor
+Disclosures,Disclosures,factor
