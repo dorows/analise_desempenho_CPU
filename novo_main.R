@@ -146,11 +146,17 @@ library(tidyr)
 # Identificar colunas de benchmark (todas terminam com Base ou Peak e começam com 6)
 bench_cols <- grep("^6\\d{2} (Base|Peak)$", names(speed_clean), value = TRUE)
 
-# Montar a tabela de estatísticas resumidas
-resumo_benchmarks <- speed_clean |>
-  select(all_of(bench_cols)) |>
-  pivot_longer(cols = everything(), names_to = "benchmark", values_to = "valor") |>
-  group_by(benchmark) |>
+# Juntar colunas de interesse: benchmarks + hardware
+colunas_estatisticas <- c(
+  grep("^6\\d{2} (Base|Peak)$", names(speed_clean), value = TRUE),
+  "Processor MHz", "cache_l1_kb", "cache_l2_kb", "cache_l3_kb"
+)
+
+# Criar tabela descritiva
+resumo_completo <- speed_clean |>
+  select(all_of(colunas_estatisticas)) |>
+  pivot_longer(cols = everything(), names_to = "variavel", values_to = "valor") |>
+  group_by(variavel) |>
   summarise(
     media = mean(valor, na.rm = TRUE),
     mediana = median(valor, na.rm = TRUE),
@@ -162,7 +168,7 @@ resumo_benchmarks <- speed_clean |>
     maximo = max(valor, na.rm = TRUE),
     .groups = "drop"
   ) |>
-  arrange(benchmark)
+  arrange(variavel)
 
 # Criar pasta se não existir
 if (!dir.exists("tabelas_e_graficos")) {
@@ -170,7 +176,7 @@ if (!dir.exists("tabelas_e_graficos")) {
 }
 
 # Salvar a tabela de resumo como CSV
-readr::write_csv(resumo_benchmarks, "tabelas_e_graficos/resumo_benchmarks.csv")
+readr::write_csv(resumo_completo, "tabelas_e_graficos/resumo_completo.csv")
 
 #------------------------------------------------
 # Criando dois gráficos, cada gráfico mostrará boxplots por benchmark
@@ -422,3 +428,55 @@ grafico_vendedores <- ggplot(dados_vendedores, aes(x = `Hardware Vendor`, y = Ba
 # Exibir e salvar
 print(grafico_vendedores)
 ggsave("tabelas_e_graficos/boxplot_baseline_por_vendedor.png", grafico_vendedores, width = 10, height = 6)
+
+#------------------------------------------------
+# analise de densidade, peak e base, para cada benchmark
+
+library(ggplot2)
+library(tidyr)
+library(patchwork)
+
+# 1. Selecionar colunas
+bench_cols_base <- grep("^6\\d{2} Base$", names(speed_clean), value = TRUE)
+bench_cols_peak <- grep("^6\\d{2} Peak$", names(speed_clean), value = TRUE)
+
+# 2. Long format
+dados_base <- speed_clean |>
+  select(all_of(bench_cols_base)) |>
+  pivot_longer(everything(), names_to = "benchmark", values_to = "valor") |>
+  mutate(tipo = "Base")
+
+dados_peak <- speed_clean |>
+  select(all_of(bench_cols_peak)) |>
+  pivot_longer(everything(), names_to = "benchmark", values_to = "valor") |>
+  mutate(tipo = "Peak")
+
+# 3. Juntar
+dados_benchmarks <- bind_rows(dados_base, dados_peak)
+
+# 4. Função para gráfico de densidade individual
+plot_density <- function(df, tipo_filtro, y_lim = 0.5) {
+  df |>
+    filter(tipo == tipo_filtro) |>
+    ggplot(aes(x = valor)) +
+    geom_density(fill = ifelse(tipo_filtro == "Base", "#8ecae6", "#ffb703"), alpha = 0.6) +
+    facet_wrap(~benchmark, scales = "free", ncol = 5) +
+    labs(
+      title = paste("Distribuição de Densidade - Benchmarks", tipo_filtro),
+      x = "Pontuação",
+      y = "Densidade"
+    ) +
+    coord_cartesian(ylim = c(0, y_lim)) +  # 👈 substitui ylim()
+    theme_minimal()
+}
+
+# 5. Criar os dois painéis
+plot_base <- plot_density(dados_benchmarks, "Base")
+plot_peak <- plot_density(dados_benchmarks, "Peak")
+
+# 6. Juntar (4 linhas: 2 base + 2 peak)
+painel_densidade <- plot_base / plot_peak
+
+# 7. Salvar
+ggsave("tabelas_e_graficos/densidade_benchmarks_base_peak.png", painel_densidade, width = 16, height = 12)
+
