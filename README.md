@@ -1,44 +1,30 @@
-Os resultados da limpesa dos dados deixou claro que o SPEC2017 tem uma tendência muito maior para processadores de servidor,
-mas isso não atrapalha a ideia de mostrar o AMD vs Intel no trabalho.
+# Análise do desempenho de sistemas computacionais a partir da base SPEC CPU 2017: 
+#            Um estudo introdutório dos resultados de speed-int
 
-### Baseline
-  Configuração obrigatória para todos os participantes.
-Usa parâmetros de compilação restritos e mais padronizados, para garantir comparabilidade entre diferentes processadores.
-Mostra o desempenho "médio realista" sem otimizações agressivas.
+## Autores:  
+David Kauan Carneiro Pereira (25103306),  
+Gustavo Sonntag Dorow (25100806),  
+Johan Akin Araújo da Silva Rodrigues (25103312),  
+Jonathan Tenório de Lima (25102233).  
 
-### Result (ou Peak)
-  Configuração mais livre, permitindo ajustes agressivos de compilador e sistema para espremer o máximo do hardware.
-Representa o melhor desempenho possível (otimizações máximas).
-
-## Benchmarks escolhidos (SPEC CPU2017), fora o Result Base e Result.
-
-### 600.perlbench_s  
-- **O que é:** Versão adaptada do interpretador **Perl 5**.  
-- **O que mede:** Desempenho em **interpretação de scripts e manipulação de strings**.  
-- **Relevância:** Mostra eficiência em workloads típicos de linguagens interpretadas, processamento de texto e aplicações web antigas.
+Universidade Federal de Santa Catarina (UFSC), Departamento de Informática e Estatística (INE), Graduação em Sistemas de Informação.
 
 ---
 
-### 602.gcc_s  
-- **O que é:** Compilações de programas reais usando o compilador **GNU GCC**.  
-- **O que mede:** Performance em **compilação de código C**.  
-- **Relevância:** Indica a capacidade da CPU em workloads de compilação e transformação de código, importante em ambientes de desenvolvimento e build servers.
+## Introdução e objetivos
 
----
+  O custo decrescente dos componentes dos sistemas computacionais, em especial os processado-
+res, permitiu uma contínua e intensa evolução no desempenho das máquinas perante algoritmos que
+resolvem problemas cada vez mais complexos. Os blocos construtores (building blocks) dos compu-
+tadores modernos são virtualmente os mesmos que deram origem ao IAS, no entanto, as técnicas
+para extrair o máximo desempenho tornaram-se altamente sofisticadas (STALLINGS, 2021).
 
-### 605.mcf_s  
-- **O que é:** Implementa o problema de **fluxo de transporte** (*Min Cost Flow*).  
-- **O que mede:** Algoritmos de otimização e programação linear.  
-- **Relevância:** Muito sensível a **latência de memória e largura de banda**. CPUs com caches mais eficientes se destacam.
+  A microarquitetura de um sistema computacional compreende o conjunto de implementações inter-
+nas de um processador que definem como as instruções (ISA) são executadas no nível de hardware
+e, por isso mesmo, possui papel chave no desempenho dos computadores. Os benchmarks pos-
+suem papel fundamental na evolução contínua da microarquitetura dos sistemas e compiladores
+(LIMAYE; ADEGBIJA, 2018).
 
----
-
-##  Por que esses três?  
-- **600 (perlbench)** → mostra desempenho em código interpretado e manipulação de strings.  
-- **602 (gcc)** → representa workloads **intensivos em CPU** no desenvolvimento de software.  
-- **605 (mcf)** → testa **eficiência de memória** e comunicação entre caches.  
-
-Essa combinação traz:
-- Interpretação / Texto  
-- Compilação / Processamento pesado  
-- Otimização / Gargalo de memória
+  Um dos benchmarks mais utilizados globalmente é fornecido pela Standard Performance Evalua-
+tion Corporation (Standard Performance Evaluation Corporation (SPEC), 2024), cuja última versão
+(SPEC CPU 2017) avaliou 43 benchmarks diferentes conforme a tabela 1.

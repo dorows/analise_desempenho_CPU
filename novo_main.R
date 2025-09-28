@@ -97,6 +97,10 @@ speed_clean <- speed_clean |>
     `# Cores` = as.integer(`# Cores`),
     `# Chips` = as.integer(`# Chips`),
     `# Enabled Threads Per Core` = as.integer(`# Enabled Threads Per Core`),
+    cache_l1_kb = as.integer(cache_l1_kb),
+    cache_l2_kb = as.integer(cache_l2_kb),
+    cache_l3_kb = as.integer(cache_l3_kb),
+    
     
     # --- Quantitativas contínuas (numeric) ---
     `Processor MHz` = as.numeric(`Processor MHz`),
@@ -122,11 +126,7 @@ speed_clean <- speed_clean |>
     `648 Peak` = as.numeric(`648 Peak`),
     `648 Base` = as.numeric(`648 Base`),
     `657 Peak` = as.numeric(`657 Peak`),
-    `657 Base` = as.numeric(`657 Base`),
-    
-    cache_l1_kb = as.numeric(cache_l1_kb),
-    cache_l2_kb = as.numeric(cache_l2_kb),
-    cache_l3_kb = as.numeric(cache_l3_kb)
+    `657 Base` = as.numeric(`657 Base`)
   )
 
 ##testes
@@ -480,3 +480,36 @@ painel_densidade <- plot_base / plot_peak
 # 7. Salvar
 ggsave("tabelas_e_graficos/densidade_benchmarks_base_peak.png", painel_densidade, width = 16, height = 12)
 
+#------------------------------------------------
+# histogramas (em gráficos de barra) para as variáveis de cache
+
+library(ggplot2)
+library(patchwork)
+
+# Converter L3 temporariamente para MB
+speed_clean <- speed_clean |>
+  mutate(cache_l3_mb = cache_l3_kb / 1024)
+
+# Histograma L1
+hist_l1 <- ggplot(speed_clean, aes(x = cache_l1_kb)) +
+  geom_bar(fill = "#219ebc") +
+  labs(title = "Frequência - Cache L1 (KB)", x = "Cache L1 (KB)", y = "Contagem") +
+  theme_minimal()
+
+# Histograma L2
+hist_l2 <- ggplot(speed_clean, aes(x = cache_l2_kb)) +
+  geom_bar(fill = "#8ecae6") +
+  labs(title = "Frequência - Cache L2 (KB)", x = "Cache L2 (KB)", y = "Contagem") +
+  theme_minimal()
+
+# Histograma L3 (em MB)
+hist_l3 <- ggplot(speed_clean, aes(x = cache_l3_mb)) +
+  geom_bar(fill = "#ffb703") +
+  labs(title = "Frequência - Cache L3 (MB)", x = "Cache L3 (MB)", y = "Contagem") +
+  theme_minimal()
+
+# Juntar os três gráficos
+(hist_l1 | hist_l2 | hist_l3)
+
+# Salvar na pasta
+ggsave("tabelas_e_graficos/histogramas_cache_mb.png", (hist_l1 | hist_l2 | hist_l3), width = 14, height = 5)
