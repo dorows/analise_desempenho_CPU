@@ -482,34 +482,29 @@ ggsave("tabelas_e_graficos/densidade_benchmarks_base_peak.png", painel_densidade
 
 #------------------------------------------------
 # histogramas (em gráficos de barra) para as variáveis de cache
-
 library(ggplot2)
 library(patchwork)
 
-# Converter L3 temporariamente para MB
-speed_clean <- speed_clean |>
-  mutate(cache_l3_mb = cache_l3_kb / 1024)
-
-# Histograma L1
+# Histograma L1 - Barras finas
 hist_l1 <- ggplot(speed_clean, aes(x = cache_l1_kb)) +
-  geom_bar(fill = "#219ebc") +
+  geom_bar(fill = "#219ebc", width = 1) +
   labs(title = "Frequência - Cache L1 (KB)", x = "Cache L1 (KB)", y = "Contagem") +
   theme_minimal()
 
-# Histograma L2
+# Histograma L2 - Padrão
 hist_l2 <- ggplot(speed_clean, aes(x = cache_l2_kb)) +
-  geom_bar(fill = "#8ecae6") +
+  geom_bar(fill = "#219ebc") +
   labs(title = "Frequência - Cache L2 (KB)", x = "Cache L2 (KB)", y = "Contagem") +
   theme_minimal()
 
-# Histograma L3 (em MB)
-hist_l3 <- ggplot(speed_clean, aes(x = cache_l3_mb)) +
-  geom_bar(fill = "#ffb703") +
-  labs(title = "Frequência - Cache L3 (MB)", x = "Cache L3 (MB)", y = "Contagem") +
+# Histograma L3 - Base mais larga e barras mais grossas, limite do eixo y
+hist_l3 <- ggplot(speed_clean, aes(x = cache_l3_kb)) +
+  geom_histogram(binwidth = 15000, fill = "#219ebc", width = 150000) +
+  ylim(0, 400) +
+  labs(title = "Frequência - Cache L3 (KB)", x = "Cache L3 (KB)", y = "Contagem") +
   theme_minimal()
 
-# Juntar os três gráficos
+# Juntar e salvar
 (hist_l1 | hist_l2 | hist_l3)
 
-# Salvar na pasta
-ggsave("tabelas_e_graficos/histogramas_cache_mb.png", (hist_l1 | hist_l2 | hist_l3), width = 14, height = 5)
+ggsave("tabelas_e_graficos/histogramas_cache_final.png", (hist_l1 | hist_l2 | hist_l3), width = 20, height = 5)
