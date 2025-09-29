@@ -1,9 +1,5 @@
-# Análise do desempenho de sistemas computacionais a partir da base
-# SPEC CPU 2017: um estudo introdutório dos resultados de speed-int
-
-## Universidade Federal de Santa Catarina (UFSC), Departamento de Informática e Estatística (INE), Graduação em Sistemas de Informação
-
----
+# Análise do desempenho de sistemas computacionais a partir da base SPEC CPU 2017
+Universidade Federal de Santa Catarina (UFSC), Departamento de Informática e Estatística (INE), Graduação em Sistemas de Informação
 
 [Clique aqui para ver o documentação completa, como um resumo expandido, em PDF](docs/main.pdf)
 
